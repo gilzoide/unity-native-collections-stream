@@ -6,13 +6,13 @@ using UnityEngine;
 
 namespace Gilzoide.NativeCollectionsStream
 {
-    public unsafe class NativeCollectionStream<TList> : Stream
+    public class NativeCollectionReadOnlyStream<TList> : Stream
         where TList : INativeList<byte>
     {
-        private readonly TList _list;
-        private int _position;
+        protected TList _list;
+        protected int _position;
 
-        public NativeCollectionStream(TList list)
+        public NativeCollectionReadOnlyStream(TList list)
         {
             _list = list;
         }
@@ -21,7 +21,7 @@ namespace Gilzoide.NativeCollectionsStream
 
         public override bool CanSeek => true;
 
-        public override bool CanWrite => true;
+        public override bool CanWrite => false;
 
         public override long Length => _list.Length;
 
@@ -69,11 +69,13 @@ namespace Gilzoide.NativeCollectionsStream
             }
 
             int bytesCopied = Mathf.Min(count, bytesAvailable);
-
-            void* src = UnsafeUtility.AddressOf(ref _list.ElementAt(_position));
-            fixed (byte* dest = buffer)
+            unsafe
             {
-                UnsafeUtility.MemCpy(dest + offset, src, bytesCopied);
+                void* src = UnsafeUtility.AddressOf(ref _list.ElementAt(_position));
+                fixed (byte* dest = buffer)
+                {
+                    UnsafeUtility.MemCpy(dest + offset, src, bytesCopied);
+                }
             }
             _position += bytesCopied;
             return bytesCopied;
@@ -123,7 +125,35 @@ namespace Gilzoide.NativeCollectionsStream
 
         public override void SetLength(long value)
         {
-            _list.Length = checked((int) value);
+            throw new NotSupportedException();
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override void WriteByte(byte value)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+    public class NativeCollectionStream<TList> : NativeCollectionReadOnlyStream<TList>
+        where TList : INativeList<byte>
+    {
+        public NativeCollectionStream(TList list) : base(list) {}
+
+        public override bool CanWrite => true;
+
+        public override void WriteByte(byte value)
+        {
+            if (_position >= _list.Length)
+            {
+                _list.Length++;
+            }
+            _list[_position] = value;
+            _position++;
         }
 
         public override void Write(byte[] buffer, int offset, int count)
@@ -150,21 +180,21 @@ namespace Gilzoide.NativeCollectionsStream
                 _list.Length = _position + count;
             }
 
-            void* dest = UnsafeUtility.AddressOf(ref _list.ElementAt(_position));
-            fixed (byte* src = buffer)
+            unsafe
             {
-                UnsafeUtility.MemCpy(dest, src + offset, count);
+                void* dest = UnsafeUtility.AddressOf(ref _list.ElementAt(_position));
+                fixed (byte* src = buffer)
+                {
+                    UnsafeUtility.MemCpy(dest, src + offset, count);
+                }
             }
             _position += count;
         }
 
-        public override void WriteByte(byte value)
+        public override void SetLength(long value)
         {
-            if (_position >= _list.Length)
-            {
-                _list.Length++;
-            }
-            _list[_position] = value;
+            _list.Length = checked((int) value);
         }
     }
+
 }
