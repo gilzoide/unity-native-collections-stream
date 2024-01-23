@@ -206,5 +206,46 @@ namespace Gilzoide.NativeCollectionsStream.Tests.Editor
         }
 
         #endregion
+    
+        #region Write
+
+        [Test, TestCaseSource(nameof(ListSizes))]
+        public void NativeListStream_Write(int byteCount)
+        {
+            using (var list = new NativeList<byte>(Allocator.Temp))
+            {
+                TestWrite(list, byteCount);
+            }
+        }
+
+        private static void TestWrite<TList>(TList list, int byteCount)
+            where TList : INativeList<byte>
+        {
+            list.Clear();
+            
+            var array = new byte[byteCount];
+            for (int i = 0; i < byteCount; i++)
+            {
+                array[i] = (byte) Random.Range(0, byte.MaxValue);
+            }
+            using (var stream = new NativeCollectionStream<TList>(list))
+            {
+                const int blockSize = 128;
+                for (int i = 0; i < byteCount; i += blockSize)
+                {
+                    int count = Mathf.Min(byteCount - i, blockSize);
+                    stream.Write(array, i, count);
+                }
+            }
+
+            Assert.That(list.Length, Is.EqualTo(byteCount));
+            for (int i = 0; i < byteCount; i++)
+            {
+                Assert.That(list[i], Is.EqualTo(array[i]));
+            }
+        }
+
+        #endregion
+
     }
 }
