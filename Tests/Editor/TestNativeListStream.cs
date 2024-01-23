@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using Unity.Collections;
 using UnityEngine;
@@ -17,56 +18,56 @@ namespace Gilzoide.NativeCollectionsStream.Tests.Editor
         #region ReadByte
         
         [Test, TestCaseSource(nameof(ListSizes))]
-        public void NativeListStream_ReadByte_ShouldReturnTheSameBytes(int listSize)
+        public void NativeListStream_ReadByte(int listSize)
         {
             using (var list = new NativeList<byte>(Allocator.Temp))
             {
                 list.Fill(listSize);
-                NativeListStream_ReadByte_ShouldReturnTheSameBytes(list);
+                TestReadByte(list);
             }
         }
 
         [Test, TestCase(0), TestCase(1), TestCase(30)]
-        public void FixedList32Stream_ReadByte_ShouldReturnTheSameBytes(int listSize)
+        public void FixedList32Stream_ReadByte(int listSize)
         {
             var list = new FixedList32Bytes<byte>();
             list.Fill(listSize);
-            NativeListStream_ReadByte_ShouldReturnTheSameBytes(list);
+            TestReadByte(list);
         }
 
         [Test, TestCase(0), TestCase(1), TestCase(62)]
-        public void FixedList64Stream_ReadByte_ShouldReturnTheSameBytes(int listSize)
+        public void FixedList64Stream_ReadByte(int listSize)
         {
             var list = new FixedList64Bytes<byte>();
             list.Fill(listSize);
-            NativeListStream_ReadByte_ShouldReturnTheSameBytes(list);
+            TestReadByte(list);
         }
 
         [Test, TestCase(0), TestCase(1), TestCase(126)]
-        public void FixedList128Stream_ReadByte_ShouldReturnTheSameBytes(int listSize)
+        public void FixedList128Stream_ReadByte(int listSize)
         {
             var list = new FixedList128Bytes<byte>();
             list.Fill(listSize);
-            NativeListStream_ReadByte_ShouldReturnTheSameBytes(list);
+            TestReadByte(list);
         }
 
         [Test, TestCase(0), TestCase(1), TestCase(510)]
-        public void FixedList512Stream_ReadByte_ShouldReturnTheSameBytes(int listSize)
+        public void FixedList512Stream_ReadByte(int listSize)
         {
             var list = new FixedList512Bytes<byte>();
             list.Fill(listSize);
-            NativeListStream_ReadByte_ShouldReturnTheSameBytes(list);
+            TestReadByte(list);
         }
 
         [Test, TestCase(0), TestCase(1), TestCase(4094)]
-        public void FixedList4096Stream_ReadByte_ShouldReturnTheSameBytes(int listSize)
+        public void FixedList4096Stream_ReadByte(int listSize)
         {
             var list = new FixedList4096Bytes<byte>();
             list.Fill(listSize);
-            NativeListStream_ReadByte_ShouldReturnTheSameBytes(list);
+            TestReadByte(list);
         }
 
-        private static void NativeListStream_ReadByte_ShouldReturnTheSameBytes<TList>(TList list)
+        private static void TestReadByte<TList>(TList list)
             where TList : INativeList<byte>
         {
             list.Length = list.Capacity;
@@ -75,7 +76,7 @@ namespace Gilzoide.NativeCollectionsStream.Tests.Editor
                 list[i] = (byte) Random.Range(0, byte.MaxValue);
             }
 
-            using (var stream = new NativeCollectionStream<TList>(list))
+            using (var stream = new NativeCollectionReadOnlyStream<TList>(list))
             {
                 for (int i = 0; i < list.Length; i++)
                 {
@@ -92,68 +93,61 @@ namespace Gilzoide.NativeCollectionsStream.Tests.Editor
         #region Read
         
         [Test, TestCaseSource(nameof(ListSizes))]
-        public void NativeListStream_Read_ShouldReturnTheSameBytes(int listSize)
+        public void NativeListStream_Read(int listSize)
         {
             using (var list = new NativeList<byte>(Allocator.Temp))
             {
                 list.Fill(listSize);
-                NativeListStream_Read_ShouldReturnTheSameBytes(list);
+                TestRead(list);
             }
         }
 
         [Test, TestCase(0), TestCase(1), TestCase(30)]
-        public void FixedList32Stream_Read_ShouldReturnTheSameBytes(int listSize)
+        public void FixedList32Stream_Read(int listSize)
         {
             var list = new FixedList32Bytes<byte>();
             list.Fill(listSize);
-            NativeListStream_Read_ShouldReturnTheSameBytes(list);
+            TestRead(list);
         }
 
         [Test, TestCase(0), TestCase(1), TestCase(62)]
-        public void FixedList64Stream_Read_ShouldReturnTheSameBytes(int listSize)
+        public void FixedList64Stream_Read(int listSize)
         {
             var list = new FixedList64Bytes<byte>();
             list.Fill(listSize);
-            NativeListStream_Read_ShouldReturnTheSameBytes(list);
+            TestRead(list);
         }
 
         [Test, TestCase(0), TestCase(1), TestCase(126)]
-        public void FixedList128Stream_Read_ShouldReturnTheSameBytes(int listSize)
+        public void FixedList128Stream_Read(int listSize)
         {
             var list = new FixedList128Bytes<byte>();
             list.Fill(listSize);
-            NativeListStream_Read_ShouldReturnTheSameBytes(list);
+            TestRead(list);
         }
 
         [Test, TestCase(0), TestCase(1), TestCase(510)]
-        public void FixedList512Stream_Read_ShouldReturnTheSameBytes(int listSize)
+        public void FixedList512Stream_Read(int listSize)
         {
             var list = new FixedList512Bytes<byte>();
             list.Fill(listSize);
-            NativeListStream_Read_ShouldReturnTheSameBytes(list);
+            TestRead(list);
         }
 
         [Test, TestCase(0), TestCase(1), TestCase(4094)]
-        public void FixedList4096Stream_Read_ShouldReturnTheSameBytes(int listSize)
+        public void FixedList4096Stream_Read(int listSize)
         {
             var list = new FixedList4096Bytes<byte>();
             list.Fill(listSize);
-            NativeListStream_Read_ShouldReturnTheSameBytes(list);
+            TestRead(list);
         }
 
-        private static void NativeListStream_Read_ShouldReturnTheSameBytes<TList>(TList list)
+        private static void TestRead<TList>(TList list)
             where TList : INativeList<byte>
         {
-            list.Length = list.Capacity;
-            for (int i = 0; i < list.Length; i++)
+            using (var stream = new NativeCollectionReadOnlyStream<TList>(list))
             {
-                list[i] = (byte) Random.Range(0, byte.MaxValue);
-            }
-
-            var buffer = new byte[128];
-
-            using (var stream = new NativeCollectionStream<TList>(list))
-            {
+                var buffer = new byte[128];
                 int listIndex = 0;
                 while (true)
                 {
@@ -173,6 +167,41 @@ namespace Gilzoide.NativeCollectionsStream.Tests.Editor
                 Assert.That(stream.Read(buffer, 0, buffer.Length), Is.EqualTo(0));
                 Assert.That(stream.Read(buffer, 0, buffer.Length), Is.EqualTo(0));
                 Assert.That(stream.Read(buffer, 0, buffer.Length), Is.EqualTo(0));
+            }
+        }
+
+        #endregion
+    
+        #region WriteByte
+
+        [Test, TestCaseSource(nameof(ListSizes))]
+        public void NativeListStream_WriteByte(int byteCount)
+        {
+            using (var list = new NativeList<byte>(Allocator.Temp))
+            {
+                TestWriteByte(list, byteCount);
+            }
+        }
+
+        private static void TestWriteByte<TList>(TList list, int byteCount)
+            where TList : INativeList<byte>
+        {
+            list.Clear();
+            var managedList = new List<byte>();
+            using (var stream = new NativeCollectionStream<TList>(list))
+            {
+                for (int i = 0; i < byteCount; i++)
+                {
+                    var value = (byte) Random.Range(0, byte.MaxValue);
+                    managedList.Add(value);
+                    stream.WriteByte(value);
+                }
+            }
+
+            Assert.That(list.Length, Is.EqualTo(byteCount));
+            for (int i = 0; i < byteCount; i++)
+            {
+                Assert.That(list[i], Is.EqualTo(managedList[i]));
             }
         }
 
