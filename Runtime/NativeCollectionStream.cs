@@ -61,7 +61,31 @@ namespace Gilzoide.NativeCollectionsStream
             {
                 throw new ArgumentException("Offset + count is greater than buffer length.");
             }
-            
+
+            unsafe
+            {
+                fixed (byte* dest = buffer)
+                {
+                    return Read(dest + offset, count);
+                }
+            }
+        }
+
+#if UNITY_2021_2_OR_NEWER
+        public override int Read(Span<byte> buffer)
+        {
+            unsafe
+            {
+                fixed (byte* dest = buffer)
+                {
+                    return Read(dest, buffer.Length);
+                }
+            }
+        }
+#endif
+
+        private unsafe int Read(byte* dest, int count)
+        {
             int bytesAvailable = _list.Length - _position;
             if (bytesAvailable <= 0)
             {
@@ -69,14 +93,9 @@ namespace Gilzoide.NativeCollectionsStream
             }
 
             int bytesCopied = Mathf.Min(count, bytesAvailable);
-            unsafe
-            {
-                void* src = UnsafeUtility.AddressOf(ref _list.ElementAt(_position));
-                fixed (byte* dest = buffer)
-                {
-                    UnsafeUtility.MemCpy(dest + offset, src, bytesCopied);
-                }
-            }
+            void* src = UnsafeUtility.AddressOf(ref _list.ElementAt(_position));
+            UnsafeUtility.MemCpy(dest, src, bytesCopied);
+
             _position += bytesCopied;
             return bytesCopied;
         }
