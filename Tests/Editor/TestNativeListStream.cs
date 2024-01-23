@@ -145,28 +145,27 @@ namespace Gilzoide.NativeCollectionsStream.Tests.Editor
         private static void TestRead<TList>(TList list)
             where TList : INativeList<byte>
         {
+            const int blockSize = 128;
+            var array = new byte[list.Length + blockSize];
             using (var stream = new NativeCollectionReadOnlyStream<TList>(list))
             {
-                var buffer = new byte[128];
-                int listIndex = 0;
-                while (true)
+                int bytesRead = 0;
+                for (int i = 0; ; i += bytesRead)
                 {
-                    int bytesRead = stream.Read(buffer, 0, buffer.Length);
-                    Assert.That(bytesRead, Is.LessThanOrEqualTo(buffer.Length));
-                    if (bytesRead <= 0)
+                    bytesRead = stream.Read(array, i, blockSize);
+                    if (bytesRead == 0)
                     {
                         break;
                     }
-                    for (int i = 0; i < bytesRead; i++)
-                    {
-                        Assert.That(listIndex < list.Length);
-                        Assert.That(buffer[i], Is.EqualTo(list[listIndex]));
-                        listIndex++;
-                    }
+                    Assert.That(bytesRead, Is.InRange(0, blockSize));
                 }
-                Assert.That(stream.Read(buffer, 0, buffer.Length), Is.EqualTo(0));
-                Assert.That(stream.Read(buffer, 0, buffer.Length), Is.EqualTo(0));
-                Assert.That(stream.Read(buffer, 0, buffer.Length), Is.EqualTo(0));
+                Assert.That(stream.Read(array, 0, array.Length), Is.EqualTo(0));
+                Assert.That(stream.Read(array, 0, array.Length), Is.EqualTo(0));
+                Assert.That(stream.Read(array, 0, array.Length), Is.EqualTo(0));
+            }
+            for (int i = 0; i < list.Length; i++)
+            {
+                Assert.That(array[i], Is.EqualTo(list[i]));
             }
         }
 
