@@ -194,19 +194,38 @@ namespace Gilzoide.NativeCollectionsStream
                 throw new ArgumentException("Offset + count is greater than buffer length.");
             }
 
+            unsafe
+            {
+                fixed (byte* src = buffer)
+                {
+                    Write(src + offset, count);
+                }
+            }
+        }
+
+#if UNITY_2021_2_OR_NEWER
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            unsafe
+            {
+                fixed (byte* src = buffer)
+                {
+                    Write(src, buffer.Length);
+                }
+            }
+        }
+#endif
+
+        private unsafe void Write(byte* src, int count)
+        {
             if (_position + count > _list.Length)
             {
                 _list.Length = _position + count;
             }
 
-            unsafe
-            {
-                void* dest = UnsafeUtility.AddressOf(ref _list.ElementAt(_position));
-                fixed (byte* src = buffer)
-                {
-                    UnsafeUtility.MemCpy(dest, src + offset, count);
-                }
-            }
+            void* dest = UnsafeUtility.AddressOf(ref _list.ElementAt(_position));
+            UnsafeUtility.MemCpy(dest, src, count);
+
             _position += count;
         }
 
