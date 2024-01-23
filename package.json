@@ -1,0 +1,14 @@
+{
+  "name": "com.gilzoide.native-collections-stream",
+  "displayName": "Native Collections Stream",
+  "version": "1.0.0-preview1",
+  "description": "Stream, TextReader and TextWriter implementations backed by Unity Native Collections.",
+  "homepage": "https://github.com/gilzoide/unity-collections-stream",
+  "license": "Unlicense",
+  "author": {
+    "name": "Gil Barbosa Reis"
+  },
+  "dependencies": {
+    "com.unity.collections": "1.1.0"
+  }
+}
