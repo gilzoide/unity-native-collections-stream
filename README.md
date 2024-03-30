@@ -1,4 +1,6 @@
 # Native Collections Stream
+[![openupm](https://img.shields.io/npm/v/com.gilzoide.native-collections-stream?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/com.gilzoide.native-collections-stream/)
+
 `Stream`, `TextReader` and `TextWriter` implementations backed by Unity Native Collections.
 
 
@@ -33,6 +35,10 @@
 
 ## How to install
 Either:
+- Use the [openupm registry](https://openupm.com/) and install this package using the [openupm-cli](https://github.com/openupm/openupm-cli):
+  ```
+  openupm add com.gilzoide.native-collections-stream
+  ```
 - Install using the [Unity Package Manager](https://docs.unity3d.com/Manual/upm-ui-giturl.html) with the following URL:
   ```
   https://github.com/gilzoide/unity-native-collections-stream.git#1.0.0-preview1
